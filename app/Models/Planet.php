@@ -30,8 +30,6 @@ class Planet extends Model
 
     /**
      * Get the characters that belong to this planet (residents).
-     *
-     * @return HasMany
      */
     public function characters(): HasMany
     {
@@ -40,8 +38,6 @@ class Planet extends Model
 
     /**
      * Alias for characters relationship (residents).
-     *
-     * @return HasMany
      */
     public function residents(): HasMany
     {

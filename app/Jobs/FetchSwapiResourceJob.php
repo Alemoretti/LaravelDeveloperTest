@@ -45,23 +45,20 @@ class FetchSwapiResourceJob implements ShouldQueue
     /**
      * Create a new job instance.
      *
-     * @param string $resourceType The resource type (people, planets)
-     * @param int $page The page number
+     * @param  string  $resourceType  The resource type (people, planets)
+     * @param  int  $page  The page number
      */
     public function __construct(
         public string $resourceType,
         public int $page = 1
-    ) {
-    }
+    ) {}
 
     /**
      * Get the unique ID for the job.
-     *
-     * @return string
      */
     public function uniqueId(): string
     {
-        return $this->resourceType . '-page-' . $this->page;
+        return $this->resourceType.'-page-'.$this->page;
     }
 
     /**
@@ -89,7 +86,7 @@ class FetchSwapiResourceJob implements ShouldQueue
             ]);
 
             // If there's a next page, dispatch another FetchSwapiResourceJob
-            if (!empty($data['next'])) {
+            if (! empty($data['next'])) {
                 self::dispatch($this->resourceType, $this->page + 1);
 
                 Log::info('Dispatched FetchSwapiResourceJob for next page', [

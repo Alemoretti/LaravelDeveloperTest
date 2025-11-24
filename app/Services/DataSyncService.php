@@ -13,12 +13,12 @@ class DataSyncService
     /**
      * Sync a resource type (fetch all and sync).
      *
-     * @param string $resourceType The resource type (people, planets)
+     * @param  string  $resourceType  The resource type (people, planets)
      * @return int Number of items synced
      */
     public function syncResource(string $resourceType): int
     {
-        $swapiService = new SwapiService();
+        $swapiService = new SwapiService;
         $count = 0;
 
         Log::info('Starting resource sync', ['resource_type' => $resourceType]);
@@ -61,7 +61,7 @@ class DataSyncService
     /**
      * Sync a character from SWAPI data.
      *
-     * @param array $data The character data from SWAPI
+     * @param  array  $data  The character data from SWAPI
      * @return Character The synced character model
      */
     public function syncCharacter(array $data): Character
@@ -104,7 +104,7 @@ class DataSyncService
     /**
      * Sync a planet from SWAPI data.
      *
-     * @param array $data The planet data from SWAPI
+     * @param  array  $data  The planet data from SWAPI
      * @return Planet The synced planet model
      */
     public function syncPlanet(array $data): Planet
@@ -147,14 +147,14 @@ class DataSyncService
     /**
      * Extract SWAPI ID from a URL.
      *
-     * @param string $url The SWAPI URL
+     * @param  string  $url  The SWAPI URL
      * @return string The extracted ID
      */
     private function extractSwapiId(string $url): string
     {
         // Extract ID from URL like "https://swapi.dev/api/people/1/"
         $parts = explode('/', rtrim($url, '/'));
+
         return end($parts);
     }
 }
-

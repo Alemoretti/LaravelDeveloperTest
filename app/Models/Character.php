@@ -30,8 +30,6 @@ class Character extends Model
 
     /**
      * Get the homeworld planet of the character.
-     *
-     * @return BelongsTo
      */
     public function homeworld(): BelongsTo
     {

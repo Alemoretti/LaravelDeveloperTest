@@ -40,36 +40,34 @@ class SyncSwapiDataCommand extends Command
             if ($resource) {
                 // Sync specific resource
                 $this->syncSpecificResource($dataSyncService, $resource);
-            } elseif ($all || (!$resource && !$all)) {
+            } elseif ($all || (! $resource && ! $all)) {
                 // Sync all (default behavior if no options provided)
                 $this->syncAllResources($dataSyncService);
             }
 
             $this->newLine();
             $this->info('✅ Synchronization completed successfully!');
+
             return Command::SUCCESS;
         } catch (\Exception $e) {
             $this->newLine();
-            $this->error('❌ Synchronization failed: ' . $e->getMessage());
+            $this->error('❌ Synchronization failed: '.$e->getMessage());
             Log::error('SWAPI sync command failed', [
                 'exception' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return Command::FAILURE;
         }
     }
 
     /**
      * Sync a specific resource type.
-     *
-     * @param DataSyncService $dataSyncService
-     * @param string $resource
-     * @return void
      */
     private function syncSpecificResource(DataSyncService $dataSyncService, string $resource): void
     {
         // Validate resource type
-        if (!in_array($resource, ['people', 'planets'])) {
+        if (! in_array($resource, ['people', 'planets'])) {
             $this->error('Invalid resource type. Must be either "people" or "planets".');
             throw new \InvalidArgumentException('Invalid resource type');
         }
@@ -89,9 +87,6 @@ class SyncSwapiDataCommand extends Command
 
     /**
      * Sync all resources (planets first, then characters).
-     *
-     * @param DataSyncService $dataSyncService
-     * @return void
      */
     private function syncAllResources(DataSyncService $dataSyncService): void
     {

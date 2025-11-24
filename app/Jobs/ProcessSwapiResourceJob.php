@@ -2,7 +2,6 @@
 
 namespace App\Jobs;
 
-use App\Models\Character;
 use App\Models\SyncLog;
 use App\Services\DataSyncService;
 use App\Services\RelationshipMapper;
@@ -48,24 +47,22 @@ class ProcessSwapiResourceJob implements ShouldQueue
     /**
      * Create a new job instance.
      *
-     * @param string $resourceType The resource type (people, planets)
-     * @param array $resourceData The resource data from SWAPI
+     * @param  string  $resourceType  The resource type (people, planets)
+     * @param  array  $resourceData  The resource data from SWAPI
      */
     public function __construct(
         public string $resourceType,
         public array $resourceData
-    ) {
-    }
+    ) {}
 
     /**
      * Get the unique ID for the job.
-     *
-     * @return string
      */
     public function uniqueId(): string
     {
         $swapiId = $this->extractSwapiId($this->resourceData['url'] ?? '');
-        return $this->resourceType . '-' . $swapiId;
+
+        return $this->resourceType.'-'.$swapiId;
     }
 
     /**
@@ -92,6 +89,7 @@ class ProcessSwapiResourceJob implements ShouldQueue
                 'resource_type' => $this->resourceType,
                 'swapi_id' => $swapiId,
             ]);
+
             return;
         }
 
@@ -141,13 +139,11 @@ class ProcessSwapiResourceJob implements ShouldQueue
 
     /**
      * Extract SWAPI ID from URL.
-     *
-     * @param string $url
-     * @return string
      */
     private function extractSwapiId(string $url): string
     {
         $parts = explode('/', rtrim($url, '/'));
+
         return end($parts);
     }
 }
