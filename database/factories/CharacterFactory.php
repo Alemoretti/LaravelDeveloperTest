@@ -25,9 +25,11 @@ class CharacterFactory extends Factory
      */
     public function definition(): array
     {
+        static $id = 1000;
+
         return [
-            'swapi_id' => fake()->unique()->numerify('###'),
-            'name' => fake()->unique()->name(),
+            'swapi_id' => $id++,
+            'name' => fake()->name().' '.fake()->numberBetween(1, 999),
             'height' => fake()->numberBetween(150, 220),
             'mass' => fake()->numberBetween(50, 150),
             'hair_color' => fake()->randomElement(['black', 'brown', 'blond', 'red', 'gray', 'white', 'none', 'unknown']),
