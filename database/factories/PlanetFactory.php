@@ -24,29 +24,11 @@ class PlanetFactory extends Factory
      */
     public function definition(): array
     {
+        static $id = 1000;
+
         return [
-            'swapi_id' => fake()->unique()->numerify('###'),
-            'name' => fake()->unique()->randomElement([
-                'Tatooine',
-                'Alderaan',
-                'Yavin IV',
-                'Hoth',
-                'Dagobah',
-                'Bespin',
-                'Endor',
-                'Naboo',
-                'Coruscant',
-                'Kamino',
-                'Geonosis',
-                'Utapau',
-                'Mustafar',
-                'Kashyyyk',
-                'Polis Massa',
-                'Mygeeto',
-                'Felucia',
-                'Cato Neimoidia',
-                'Saleucami',
-            ]).' '.fake()->numberBetween(1, 100),
+            'swapi_id' => $id++,
+            'name' => fake()->unique()->city().' '.fake()->numberBetween(1, 999),
             'rotation_period' => fake()->numberBetween(10, 50),
             'orbital_period' => fake()->numberBetween(200, 500),
             'diameter' => fake()->numberBetween(5000, 15000),
