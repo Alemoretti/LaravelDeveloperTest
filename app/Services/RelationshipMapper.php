@@ -11,9 +11,8 @@ class RelationshipMapper
     /**
      * Map a character's homeworld relationship.
      *
-     * @param Character $character The character model
-     * @param array $swapiData The character data from SWAPI
-     * @return void
+     * @param  Character  $character  The character model
+     * @param  array  $swapiData  The character data from SWAPI
      */
     public function mapCharacterHomeworld(Character $character, array $swapiData): void
     {
@@ -22,23 +21,25 @@ class RelationshipMapper
                 'character_id' => $character->id,
                 'character_name' => $character->name,
             ]);
+
             return;
         }
 
         $homeworldSwapiId = $this->extractSwapiId($swapiData['homeworld']);
 
-        if (!$homeworldSwapiId) {
+        if (! $homeworldSwapiId) {
             Log::warning('Could not extract homeworld SWAPI ID', [
                 'character_id' => $character->id,
                 'homeworld_url' => $swapiData['homeworld'],
             ]);
+
             return;
         }
 
         // Find the planet by swapi_id
         $planet = Planet::where('swapi_id', $homeworldSwapiId)->first();
 
-        if (!$planet) {
+        if (! $planet) {
             Log::warning('Homeworld planet not found in database', [
                 'character_id' => $character->id,
                 'character_name' => $character->name,
@@ -48,6 +49,7 @@ class RelationshipMapper
             // Set homeworld_id to null if planet doesn't exist yet
             $character->homeworld_id = null;
             $character->save();
+
             return;
         }
 
@@ -66,7 +68,7 @@ class RelationshipMapper
     /**
      * Extract SWAPI ID from a URL.
      *
-     * @param string|null $url The SWAPI URL
+     * @param  string|null  $url  The SWAPI URL
      * @return string|null The extracted ID or null if extraction fails
      */
     public function extractSwapiId(?string $url): ?string
@@ -82,4 +84,3 @@ class RelationshipMapper
         return is_numeric($id) ? $id : null;
     }
 }
-

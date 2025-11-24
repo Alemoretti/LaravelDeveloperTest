@@ -37,14 +37,15 @@ class SwapiService
     /**
      * Get a paginated resource from SWAPI.
      *
-     * @param string $resource The resource type (people, planets)
-     * @param int $page The page number
+     * @param  string  $resource  The resource type (people, planets)
+     * @param  int  $page  The page number
      * @return array The API response data
+     *
      * @throws ConnectionException
      */
     public function getResource(string $resource, int $page = 1): array
     {
-        $url = $this->baseUrl . $resource . '/?page=' . $page;
+        $url = $this->baseUrl.$resource.'/?page='.$page;
 
         Log::info('Fetching SWAPI resource', [
             'resource' => $resource,
@@ -77,7 +78,7 @@ class SwapiService
             $data = $response->json();
 
             // Validate response structure
-            if (!isset($data['results']) || !is_array($data['results'])) {
+            if (! isset($data['results']) || ! is_array($data['results'])) {
                 Log::error('Invalid SWAPI response structure', [
                     'url' => $url,
                     'response' => $data,
@@ -106,14 +107,15 @@ class SwapiService
     /**
      * Get a specific resource by ID.
      *
-     * @param string $resource The resource type (people, planets)
-     * @param string $id The resource ID
+     * @param  string  $resource  The resource type (people, planets)
+     * @param  string  $id  The resource ID
      * @return array The API response data
+     *
      * @throws ConnectionException
      */
     public function getResourceById(string $resource, string $id): array
     {
-        $url = $this->baseUrl . $resource . '/' . $id . '/';
+        $url = $this->baseUrl.$resource.'/'.$id.'/';
 
         Log::info('Fetching SWAPI resource by ID', [
             'resource' => $resource,
@@ -149,7 +151,7 @@ class SwapiService
     /**
      * Get all resources of a type (iterates through all pages).
      *
-     * @param string $resource The resource type (people, planets)
+     * @param  string  $resource  The resource type (people, planets)
      * @return Generator Yields each item from all pages
      */
     public function getAllResources(string $resource): Generator
@@ -165,7 +167,7 @@ class SwapiService
                     yield $item;
                 }
 
-                $hasMore = !empty($data['next']);
+                $hasMore = ! empty($data['next']);
                 $page++;
 
                 // Add a small delay to be respectful to the API
@@ -184,4 +186,3 @@ class SwapiService
         }
     }
 }
-

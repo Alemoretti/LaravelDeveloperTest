@@ -10,7 +10,7 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 // Schedule SWAPI data synchronization
-Schedule::job(new SyncAllSwapiDataJob())
+Schedule::job(new SyncAllSwapiDataJob)
     ->dailyAt('02:00')
     ->withoutOverlapping()
     ->onOneServer()

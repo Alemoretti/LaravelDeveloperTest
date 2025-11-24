@@ -46,7 +46,7 @@ class PlanetFactory extends Factory
                 'Felucia',
                 'Cato Neimoidia',
                 'Saleucami',
-            ]) . ' ' . fake()->numberBetween(1, 100),
+            ]).' '.fake()->numberBetween(1, 100),
             'rotation_period' => fake()->numberBetween(10, 50),
             'orbital_period' => fake()->numberBetween(200, 500),
             'diameter' => fake()->numberBetween(5000, 15000),
