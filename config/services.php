@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'swapi' => [
+        'base_url' => env('SWAPI_BASE_URL', 'https://swapi.dev/api/'),
+        'timeout' => env('SWAPI_TIMEOUT', 30),
+        'retry_attempts' => env('SWAPI_RETRY_ATTEMPTS', 3),
+    ],
+
 ];
