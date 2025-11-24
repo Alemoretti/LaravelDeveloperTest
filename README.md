@@ -79,39 +79,136 @@ by the agent. Here is what we are looking for:
 - Describe the quality of the code created and what process you went through to evaluate the code.
 - Describe the changes you made to the agentically created code.
 
-## Getting Started (To Be Completed by Candidate)
-
-When you complete your submission, replace this section with instructions for setting up and running your project.
-Your instructions should include:
-
-```markdown
 ## Getting Started
 
+This application is a Star Wars Data Hub built with Laravel 12 that integrates with SWAPI (Star Wars API) to fetch, store, and display information about characters and planets.
+
 ### Prerequisites
-- PHP 8.x
-- Composer
-- Node.js & npm
-- [Database of your choice]
+- PHP 8.2 or higher
+- Composer (latest stable version)
+- Node.js 18.x or higher & npm
+- SQLite (included with PHP) or MySQL/PostgreSQL
 
 ### Installation
-1. Clone the repository
-2. Copy `.env.example` to `.env`
-3. [Your specific setup steps]
-4. Run migrations
-5. [Any seeding or initial data setup]
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Alemoretti/LaravelDeveloperTest.git
+   cd LaravelDeveloperTest
+   ```
+
+2. **Install dependencies**
+   ```bash
+   composer install
+   npm install
+   ```
+
+3. **Set up environment**
+   ```bash
+   cp .env.example .env
+   ```
+   
+   The `.env` file is already configured for SQLite:
+   ```env
+   DB_CONNECTION=sqlite
+   DB_DATABASE=database/database.sqlite
+   ```
+
+4. **Create the database file**
+   ```bash
+   touch database/database.sqlite
+   ```
+
+5. **Generate application key and run migrations**
+   ```bash
+   php artisan key:generate
+   php artisan migrate
+   ```
+
+6. **Build frontend assets**
+   ```bash
+   npm run build
+   ```
 
 ### Running the Application
-- Start the development server: [command]
-- Access the application at: [URL]
+
+1. **Start the development server**
+   ```bash
+   php artisan serve
+   ```
+
+2. **Start the queue worker** (in a separate terminal)
+   ```bash
+   php artisan queue:work
+   ```
+
+3. **Access the application**
+   - Open: `http://localhost:8000`
+   - You'll be redirected to the Characters page
 
 ### Testing the Data Import
-- Run the artisan command: `php artisan [your-command]`
-- View the imported data at: [URL]
-- The scheduled task runs: [frequency]
+
+**Important**: Sync planets before characters to ensure homeworld relationships are established.
+
+**Option 1: Sync all resources**
+```bash
+php artisan swapi:sync
+```
+
+**Option 2: Sync specific resources**
+```bash
+php artisan swapi:sync --resource=planets
+php artisan swapi:sync --resource=people
+```
+
+**View the imported data:**
+- Characters: `http://localhost:8000/characters`
+- Planets: `http://localhost:8000/planets`
+
+**The scheduled task runs:** Daily at 2:00 AM (configured in `routes/console.php`)
+
+To test the scheduler locally:
+```bash
+php artisan schedule:work
+```
 
 ### Running Tests
-- Run the test suite: `php artisan test`
+
+Run the complete test suite (40 tests, 91 assertions):
+```bash
+php artisan test
 ```
+
+Run specific test suites:
+```bash
+php artisan test --testsuite=Unit
+php artisan test --testsuite=Feature
+```
+
+Check code style compliance (PSR-12):
+```bash
+./vendor/bin/pint --test
+```
+
+### Key Features
+
+- **Search & Filter**: Search characters by name/gender/birth year, planets by name/climate/terrain
+- **Relationships**: Characters linked to their homeworld planets
+- **Pagination**: 15 items per page for listings, 10 for planet residents
+- **Dark Mode**: Full dark mode support throughout the UI
+- **Responsive**: Mobile-friendly design with Tailwind CSS 4.0
+
+### Troubleshooting
+
+**Queue jobs not processing?**
+- Ensure `php artisan queue:work` is running
+
+**No data after sync?**
+- Check SWAPI accessibility: `curl https://swapi.dev/api/people/1/`
+- Review logs: `storage/logs/laravel.log`
+
+**Frontend styles not loading?**
+- Run `npm run build` or `npm run dev`
 
 ## Evaluation Criteria
 
