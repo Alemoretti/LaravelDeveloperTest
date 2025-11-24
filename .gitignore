@@ -23,5 +23,5 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 
-# Temporary files - will be added at the end
-PROMPT_AGENTIC_CODING.md
+# Agentic coding documentation (for local evaluation only)
+AGENTIC_CODING_NOTES.md
