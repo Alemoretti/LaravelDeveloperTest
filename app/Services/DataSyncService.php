@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\Log;
 
 class DataSyncService
 {
+    public function __construct(
+        protected SwapiService $swapiService,
+        protected RelationshipMapper $relationshipMapper
+    ) {}
+
     /**
      * Sync a resource type (fetch all and sync).
      *
@@ -18,16 +23,17 @@ class DataSyncService
      */
     public function syncResource(string $resourceType): int
     {
-        $swapiService = new SwapiService;
         $count = 0;
 
         Log::info('Starting resource sync', ['resource_type' => $resourceType]);
 
         try {
-            foreach ($swapiService->getAllResources($resourceType) as $item) {
+            foreach ($this->swapiService->getAllResources($resourceType) as $item) {
                 try {
                     if ($resourceType === 'people') {
-                        $this->syncCharacter($item);
+                        $character = $this->syncCharacter($item);
+                        // Map homeworld relationship
+                        $this->relationshipMapper->mapCharacterHomeworld($character, $item);
                     } elseif ($resourceType === 'planets') {
                         $this->syncPlanet($item);
                     }

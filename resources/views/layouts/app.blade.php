@@ -12,40 +12,47 @@
     <!-- Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
+<body class="bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
     <!-- Navigation -->
-    <nav class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+    <nav class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-lg sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex">
-                    <div class="flex-shrink-0 flex items-center">
-                        <a href="{{ route('characters.index') }}" class="text-xl font-bold text-gray-900 dark:text-white">
-                            ⭐ Star Wars Data Hub
-                        </a>
+            <!-- Logo Section -->
+            <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
+                <a href="{{ route('characters.index') }}" class="flex items-center space-x-3 group">
+                    <span class="text-4xl group-hover:scale-110 transition-transform duration-200">⭐</span>
+                    <div>
+                        <div class="text-2xl font-bold bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 dark:from-yellow-300 dark:via-yellow-400 dark:to-yellow-500 bg-clip-text text-transparent">
+                            Star Wars Data Hub
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">Powered by SWAPI</div>
                     </div>
-                    <div class="hidden sm:ml-8 sm:flex sm:space-x-8">
-                        <a href="{{ route('characters.index') }}" 
-                           class="@if(request()->routeIs('characters.*')) border-indigo-500 text-gray-900 dark:text-white @else border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-200 @endif inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition">
-                            Characters
-                        </a>
-                        <a href="{{ route('planets.index') }}" 
-                           class="@if(request()->routeIs('planets.*')) border-indigo-500 text-gray-900 dark:text-white @else border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-200 @endif inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition">
-                            Planets
-                        </a>
-                    </div>
-                </div>
+                </a>
+            </div>
+            
+            <!-- Tabs Section -->
+            <div class="hidden sm:flex -mb-px space-x-1">
+                <a href="{{ route('characters.index') }}" 
+                   class="@if(request()->routeIs('characters.*')) border-b-4 border-indigo-600 bg-gradient-to-t from-indigo-50 to-transparent dark:from-indigo-900/20 dark:to-transparent text-indigo-700 dark:text-indigo-300 @else border-b-4 border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 @endif inline-flex items-center px-8 py-4 text-sm font-bold transition-all duration-200">
+                    <span class="text-xl mr-2">👤</span> Characters
+                </a>
+                <a href="{{ route('planets.index') }}" 
+                   class="@if(request()->routeIs('planets.*')) border-b-4 border-indigo-600 bg-gradient-to-t from-indigo-50 to-transparent dark:from-indigo-900/20 dark:to-transparent text-indigo-700 dark:text-indigo-300 @else border-b-4 border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 @endif inline-flex items-center px-8 py-4 text-sm font-bold transition-all duration-200">
+                    <span class="text-xl mr-2">🌍</span> Planets
+                </a>
             </div>
         </div>
         
         <!-- Mobile menu -->
-        <div class="sm:hidden border-t border-gray-200 dark:border-gray-700">
-            <div class="pt-2 pb-3 space-y-1">
+        <div class="sm:hidden border-t border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm">
+            <div class="flex">
                 <a href="{{ route('characters.index') }}" 
-                   class="@if(request()->routeIs('characters.*')) bg-indigo-50 dark:bg-indigo-900/20 border-indigo-500 text-indigo-700 dark:text-indigo-300 @else border-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-800 dark:hover:text-gray-200 @endif block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition">
+                   class="@if(request()->routeIs('characters.*')) border-b-4 border-indigo-600 bg-gradient-to-t from-indigo-50 to-transparent dark:from-indigo-900/20 dark:to-transparent text-indigo-700 dark:text-indigo-300 @else border-b-4 border-transparent text-gray-600 dark:text-gray-400 @endif flex-1 text-center px-4 py-4 text-sm font-bold transition-all">
+                    <span class="block text-2xl mb-1">👤</span>
                     Characters
                 </a>
                 <a href="{{ route('planets.index') }}" 
-                   class="@if(request()->routeIs('planets.*')) bg-indigo-50 dark:bg-indigo-900/20 border-indigo-500 text-indigo-700 dark:text-indigo-300 @else border-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-800 dark:hover:text-gray-200 @endif block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition">
+                   class="@if(request()->routeIs('planets.*')) border-b-4 border-indigo-600 bg-gradient-to-t from-indigo-50 to-transparent dark:from-indigo-900/20 dark:to-transparent text-indigo-700 dark:text-indigo-300 @else border-b-4 border-transparent text-gray-600 dark:text-gray-400 @endif flex-1 text-center px-4 py-4 text-sm font-bold transition-all">
+                    <span class="block text-2xl mb-1">🌍</span>
                     Planets
                 </a>
             </div>
