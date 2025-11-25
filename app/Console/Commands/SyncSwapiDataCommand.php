@@ -2,7 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Services\DataSyncService;
+use App\Contracts\DataSyncServiceInterface;
+use App\Enums\ResourceType;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -27,7 +28,7 @@ class SyncSwapiDataCommand extends Command
     /**
      * Execute the console command.
      */
-    public function handle(DataSyncService $dataSyncService): int
+    public function handle(DataSyncServiceInterface $dataSyncService): int
     {
         $this->info('🌟 Starting SWAPI Data Synchronization 🌟');
         $this->newLine();
@@ -64,21 +65,23 @@ class SyncSwapiDataCommand extends Command
     /**
      * Sync a specific resource type.
      */
-    private function syncSpecificResource(DataSyncService $dataSyncService, string $resource): void
+    private function syncSpecificResource(DataSyncServiceInterface $dataSyncService, string $resource): void
     {
         // Validate resource type
-        if (! in_array($resource, ['people', 'planets'])) {
+        $resourceType = ResourceType::tryFrom($resource);
+
+        if (! $resourceType) {
             $this->error('Invalid resource type. Must be either "people" or "planets".');
             throw new \InvalidArgumentException('Invalid resource type');
         }
 
-        $displayName = $resource === 'people' ? 'Characters' : 'Planets';
+        $displayName = $resourceType->label();
         $this->info("Syncing {$displayName}...");
 
         $bar = $this->output->createProgressBar();
         $bar->start();
 
-        $count = $dataSyncService->syncResource($resource);
+        $count = $dataSyncService->syncResource($resourceType->value);
 
         $bar->finish();
         $this->newLine();
@@ -88,7 +91,7 @@ class SyncSwapiDataCommand extends Command
     /**
      * Sync all resources (planets first, then characters).
      */
-    private function syncAllResources(DataSyncService $dataSyncService): void
+    private function syncAllResources(DataSyncServiceInterface $dataSyncService): void
     {
         $this->info('Syncing all resources...');
         $this->line('Note: Planets will be synced first, then characters to ensure homeworld relationships.');
@@ -99,7 +102,7 @@ class SyncSwapiDataCommand extends Command
         $planetsBar = $this->output->createProgressBar();
         $planetsBar->start();
 
-        $planetsCount = $dataSyncService->syncResource('planets');
+        $planetsCount = $dataSyncService->syncResource(ResourceType::PLANETS->value);
 
         $planetsBar->finish();
         $this->newLine();
@@ -111,7 +114,7 @@ class SyncSwapiDataCommand extends Command
         $charactersBar = $this->output->createProgressBar();
         $charactersBar->start();
 
-        $charactersCount = $dataSyncService->syncResource('people');
+        $charactersCount = $dataSyncService->syncResource(ResourceType::PEOPLE->value);
 
         $charactersBar->finish();
         $this->newLine();

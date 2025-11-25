@@ -2,12 +2,15 @@
 
 namespace App\Services;
 
+use App\Contracts\SwapiServiceInterface;
+use App\DataTransferObjects\CharacterDto;
+use App\DataTransferObjects\PlanetDto;
 use Generator;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class SwapiService
+class SwapiService implements SwapiServiceInterface
 {
     /**
      * Base URL for SWAPI.
@@ -152,7 +155,7 @@ class SwapiService
      * Get all resources of a type (iterates through all pages).
      *
      * @param  string  $resource  The resource type (people, planets)
-     * @return Generator Yields each item from all pages
+     * @return Generator Yields CharacterDto or PlanetDto objects from all pages
      */
     public function getAllResources(string $resource): Generator
     {
@@ -164,7 +167,21 @@ class SwapiService
                 $data = $this->getResource($resource, $page);
 
                 foreach ($data['results'] as $item) {
-                    yield $item;
+                    try {
+                        if ($resource === 'people') {
+                            yield CharacterDto::fromArray($item);
+                        } elseif ($resource === 'planets') {
+                            yield PlanetDto::fromArray($item);
+                        } else {
+                            Log::warning('Unknown resource type', ['resource' => $resource]);
+                        }
+                    } catch (\InvalidArgumentException $e) {
+                        Log::error('Failed to create DTO from API data', [
+                            'resource' => $resource,
+                            'item' => $item,
+                            'exception' => $e->getMessage(),
+                        ]);
+                    }
                 }
 
                 $hasMore = ! empty($data['next']);

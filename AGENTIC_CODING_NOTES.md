@@ -4,7 +4,7 @@
 
 I provided the AI agent (Claude Sonnet 3.5/4 via Cursor) with the context of the project that I would build. I chose a Star Wars public API and narrowed down to show only characters and planets to minimize the project scope. I used fast agent for some simple tasks like setting up, creating migrations or documenting and used the Sonnet 4.5 for more complex tasks.
 
-I divided the project in 9 steps, starting with the simple parts like setting up the environment and database. I detailed the coding practices that I wanted, like PSR, DRY, applying SOLID principles when applicable, separating a service layer to deal with the data, create the tests and commands. For the views (to build and review them faster), 
+I divided the project in 9 steps, starting with the simple parts like setting up the environment and database. I detailed the coding practices that I wanted, like PSR, DRY, applying SOLID principles when applicable, separating a service layer to deal with the data, use enums, caching, repository pattern, DTOs, create the tests and commands. For the views (to build and review them faster), 
 I chose to use Blade templates with Tailwind, without React or Vue.js.
 
 For each feature branch/step I asked to let me review what was being built so I could test. Only after my changes and tests passed, I pushed to my repository and created the Pull Request for each step. I'll list the steps below:
@@ -69,4 +69,5 @@ I created an additional Pull Request to add this agentic code markdown file, but
 
 The code quality in some areas like tests, UI and data synchronization was not good and required more manual changes than the other parts like models, migrations, controllers and using the data in the views. 
 
+Some improvements for the best practices were included in the last Pull Request checking some missing files with the agentic tool, like DTOs, interfaces and caching. I included the changes in a single PR to finish the project in the test's allocated time and listed the improvements in the PR.
 

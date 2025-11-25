@@ -2,11 +2,13 @@
 
 namespace Tests\Feature\Jobs;
 
+use App\Actions\MapCharacterHomeworldAction;
+use App\Actions\SyncCharacterAction;
+use App\Actions\SyncPlanetAction;
+use App\Enums\SyncStatus;
 use App\Jobs\ProcessSwapiResourceJob;
 use App\Models\Planet;
 use App\Models\SyncLog;
-use App\Services\DataSyncService;
-use App\Services\RelationshipMapper;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -30,7 +32,11 @@ class ProcessSwapiResourceJobTest extends TestCase
         ];
 
         $job = new ProcessSwapiResourceJob('planets', $planetData);
-        $job->handle(app(DataSyncService::class), app(RelationshipMapper::class));
+        $job->handle(
+            app(SyncCharacterAction::class),
+            app(SyncPlanetAction::class),
+            app(MapCharacterHomeworldAction::class)
+        );
 
         $this->assertDatabaseHas('planets', [
             'swapi_id' => '1',
@@ -41,7 +47,7 @@ class ProcessSwapiResourceJobTest extends TestCase
         $this->assertDatabaseHas('sync_logs', [
             'resource_type' => 'planets',
             'resource_id' => '1',
-            'status' => 'success',
+            'status' => SyncStatus::SUCCESS->value,
         ]);
     }
 
@@ -63,7 +69,11 @@ class ProcessSwapiResourceJobTest extends TestCase
         ];
 
         $job = new ProcessSwapiResourceJob('people', $characterData);
-        $job->handle(app(DataSyncService::class), app(RelationshipMapper::class));
+        $job->handle(
+            app(SyncCharacterAction::class),
+            app(SyncPlanetAction::class),
+            app(MapCharacterHomeworldAction::class)
+        );
 
         $this->assertDatabaseHas('characters', [
             'swapi_id' => '1',
@@ -74,7 +84,7 @@ class ProcessSwapiResourceJobTest extends TestCase
         $this->assertDatabaseHas('sync_logs', [
             'resource_type' => 'people',
             'resource_id' => '1',
-            'status' => 'success',
+            'status' => SyncStatus::SUCCESS->value,
         ]);
     }
 
@@ -96,12 +106,16 @@ class ProcessSwapiResourceJobTest extends TestCase
         SyncLog::create([
             'resource_type' => 'planets',
             'resource_id' => '1',
-            'status' => 'success',
+            'status' => SyncStatus::SUCCESS,
             'synced_at' => now(),
         ]);
 
         $job = new ProcessSwapiResourceJob('planets', $planetData);
-        $job->handle(app(DataSyncService::class), app(RelationshipMapper::class));
+        $job->handle(
+            app(SyncCharacterAction::class),
+            app(SyncPlanetAction::class),
+            app(MapCharacterHomeworldAction::class)
+        );
 
         $this->assertDatabaseMissing('planets', [
             'swapi_id' => '1',
@@ -130,7 +144,11 @@ class ProcessSwapiResourceJobTest extends TestCase
         ];
 
         $job = new ProcessSwapiResourceJob('planets', $planetData);
-        $job->handle(app(DataSyncService::class), app(RelationshipMapper::class));
+        $job->handle(
+            app(SyncCharacterAction::class),
+            app(SyncPlanetAction::class),
+            app(MapCharacterHomeworldAction::class)
+        );
 
         $planet->refresh();
         $this->assertEquals('Tatooine', $planet->name);

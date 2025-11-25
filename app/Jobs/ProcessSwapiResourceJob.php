@@ -2,9 +2,14 @@
 
 namespace App\Jobs;
 
+use App\Actions\MapCharacterHomeworldAction;
+use App\Actions\SyncCharacterAction;
+use App\Actions\SyncPlanetAction;
+use App\DataTransferObjects\CharacterDto;
+use App\DataTransferObjects\PlanetDto;
+use App\Enums\ResourceType;
+use App\Enums\SyncStatus;
 use App\Models\SyncLog;
-use App\Services\DataSyncService;
-use App\Services\RelationshipMapper;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -68,8 +73,11 @@ class ProcessSwapiResourceJob implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(DataSyncService $dataSyncService, RelationshipMapper $relationshipMapper): void
-    {
+    public function handle(
+        SyncCharacterAction $syncCharacterAction,
+        SyncPlanetAction $syncPlanetAction,
+        MapCharacterHomeworldAction $mapHomeworldAction
+    ): void {
         $swapiId = $this->extractSwapiId($this->resourceData['url'] ?? '');
 
         Log::info('Processing SWAPI resource', [
@@ -81,7 +89,7 @@ class ProcessSwapiResourceJob implements ShouldQueue
         // Check if already successfully synced (idempotency check)
         $existingLog = SyncLog::where('resource_type', $this->resourceType)
             ->where('resource_id', $swapiId)
-            ->where('status', 'success')
+            ->where('status', SyncStatus::SUCCESS)
             ->first();
 
         if ($existingLog) {
@@ -95,18 +103,20 @@ class ProcessSwapiResourceJob implements ShouldQueue
 
         try {
             // Sync the resource
-            if ($this->resourceType === 'people') {
-                $model = $dataSyncService->syncCharacter($this->resourceData);
+            if ($this->resourceType === ResourceType::PEOPLE->value) {
+                $dto = CharacterDto::fromArray($this->resourceData);
+                $model = $syncCharacterAction->execute($dto);
 
                 // Map homeworld relationship
-                $relationshipMapper->mapCharacterHomeworld($model, $this->resourceData);
+                $mapHomeworldAction->execute($model, $dto);
 
                 Log::info('Character processed and relationships mapped', [
                     'character_id' => $model->id,
                     'name' => $model->name,
                 ]);
-            } elseif ($this->resourceType === 'planets') {
-                $model = $dataSyncService->syncPlanet($this->resourceData);
+            } elseif ($this->resourceType === ResourceType::PLANETS->value) {
+                $dto = PlanetDto::fromArray($this->resourceData);
+                $model = $syncPlanetAction->execute($dto);
 
                 Log::info('Planet processed', [
                     'planet_id' => $model->id,
@@ -127,7 +137,7 @@ class ProcessSwapiResourceJob implements ShouldQueue
                     'resource_id' => $swapiId,
                 ],
                 [
-                    'status' => 'failed',
+                    'status' => SyncStatus::FAILED,
                     'error_message' => $e->getMessage(),
                     'synced_at' => now(),
                 ]

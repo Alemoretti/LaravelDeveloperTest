@@ -116,4 +116,3 @@ class CharacterControllerTest extends TestCase
         $response->assertSee('Unknown');
     }
 }
-
