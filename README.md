@@ -98,8 +98,14 @@ This application is a Star Wars Data Hub built with Laravel 12 that integrates w
    ```
 
 2. **Install dependencies**
+   
+   Install PHP dependencies:
    ```bash
    composer install
+   ```
+   
+   Install Node.js dependencies:
+   ```bash
    npm install
    ```
 
@@ -108,7 +114,7 @@ This application is a Star Wars Data Hub built with Laravel 12 that integrates w
    cp .env.example .env
    ```
    
-   The `.env` file is already configured for SQLite:
+   Config `.env` file DB variables. To use SQLite set:
    ```env
    DB_CONNECTION=sqlite
    DB_DATABASE=database/database.sqlite
@@ -137,29 +143,29 @@ This application is a Star Wars Data Hub built with Laravel 12 that integrates w
    php artisan serve
    ```
 
-2. **Start the queue worker** (in a separate terminal)
+2. **Sync the Star Wars data. Sync planets before characters to ensure homeworld relationships are established.**
+
+   **Option 1: Sync all resources**
+   ```bash
+   php artisan swapi:sync
+   ```
+
+   **Option 2: Sync specific resources**
+   ```bash
+   php artisan swapi:sync --resource=planets
+   php artisan swapi:sync --resource=people
+   ```
+
+3. **Start the queue worker** (in a separate terminal)
    ```bash
    php artisan queue:work
    ```
 
-3. **Access the application**
+4. **Access the application**
    - Open: `http://localhost:8000`
    - You'll be redirected to the Characters page
 
 ### Testing the Data Import
-
-**Important**: Sync planets before characters to ensure homeworld relationships are established.
-
-**Option 1: Sync all resources**
-```bash
-php artisan swapi:sync
-```
-
-**Option 2: Sync specific resources**
-```bash
-php artisan swapi:sync --resource=planets
-php artisan swapi:sync --resource=people
-```
 
 **View the imported data:**
 - Characters: `http://localhost:8000/characters`
