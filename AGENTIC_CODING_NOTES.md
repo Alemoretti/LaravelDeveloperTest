@@ -44,6 +44,8 @@ I created an additional Pull Request to add this agentic code markdown file, but
 - **Factory Unique Constraints:** Modified `PlanetFactory` and `CharacterFactory` to avoid using `unique()` on `swapi_id`, which caused overflow errors in tests with 20+ records. Changed to static incrementing IDs instead
 - **Sort Test Logic:** Corrected character sort test to use `assertSeeInOrder()` instead of manual string position checking for more reliable assertions
 - **Redirect Handling:** Updated `ExampleTest` to expect redirect (302) instead of direct response (200) after homepage behavior changed
+- **UI:** Modified the ui to use modern design with tabs, cards, filter inputs and I had to remove some unecessary parts like the profile picture that was added automatically
+- **Residents sync failure:** The mapper created wasn't working properly, so all the planets were showing 0 population, despite having synced data. It was necessary to inject `RelationshipMapper` into `DataSyncService` constructor, add call to `mapCharacterHomeworld()` after syncing each character and change from instantiating new `SwapiService` to using injected dependency
 
 **Some architecture changes needed:**
 - Ensured proper sync order (planets before characters) for relationship integrity
@@ -64,5 +66,7 @@ I created an additional Pull Request to add this agentic code markdown file, but
 2. **Manual testing:** Started dev server and queue worker, tested all features in browser
 3. **Code style check:** Ran `./vendor/bin/pint --test` before commits
 4. **Database inspection:** Verified migrations, relationships, and data integrity (before and after I had to change some data types)
+
+The code quality in some areas like tests, UI and data synchronization was not good and required more manual changes than the other parts like models, migrations, controllers and using the data in the views. 
 
 
