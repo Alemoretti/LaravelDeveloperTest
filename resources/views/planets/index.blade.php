@@ -95,10 +95,10 @@
                             <dd class="text-gray-900 dark:text-gray-100 font-medium">{{ ucfirst(Str::limit($planet->terrain, 20)) }}</dd>
                         </div>
                         @endif
-                        @if($planet->population && $planet->population > 0)
+                        @if($planet->population && $planet->population !== 'unknown' && is_numeric($planet->population))
                         <div class="flex justify-between">
                             <dt class="text-gray-500 dark:text-gray-400">Population:</dt>
-                            <dd class="text-gray-900 dark:text-gray-100 font-medium">{{ number_format($planet->population) }}</dd>
+                            <dd class="text-gray-900 dark:text-gray-100 font-medium">{{ number_format((int)$planet->population) }}</dd>
                         </div>
                         @endif
                     </dl>

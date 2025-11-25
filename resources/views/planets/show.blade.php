@@ -111,8 +111,8 @@
                         <div>
                             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Population</dt>
                             <dd class="mt-1 text-base text-gray-900 dark:text-gray-100">
-                                @if($planet->population && $planet->population > 0)
-                                    {{ number_format($planet->population) }}
+                                @if($planet->population && $planet->population !== 'unknown' && is_numeric($planet->population))
+                                    {{ number_format((int)$planet->population) }}
                                 @else
                                     <span class="text-gray-400 dark:text-gray-500">Unknown</span>
                                 @endif
