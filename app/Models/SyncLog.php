@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\SyncStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -24,10 +25,12 @@ class SyncLog extends Model
 
     /**
      * The attributes that should be cast.
-     *
-     * @var array<string, string>
      */
-    protected $casts = [
-        'synced_at' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'synced_at' => 'datetime',
+            'status' => SyncStatus::class,
+        ];
+    }
 }

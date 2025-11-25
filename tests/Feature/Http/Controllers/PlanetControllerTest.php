@@ -154,4 +154,3 @@ class PlanetControllerTest extends TestCase
         $response->assertSee('No known residents');
     }
 }
-

@@ -44,7 +44,7 @@ class SyncAllSwapiDataJob implements ShouldQueue
         try {
             // IMPORTANT: Sync planets first so that homeworld relationships can be linked
             Log::info('Starting planets synchronization');
-            FetchSwapiResourceJob::dispatch('planets', 1);
+            FetchSwapiResourceJob::dispatch(\App\Enums\ResourceType::PLANETS->value, 1);
 
             // Delay character sync to allow planets to finish
             // Using job chaining would be ideal, but for simplicity we'll dispatch after a delay
@@ -52,10 +52,10 @@ class SyncAllSwapiDataJob implements ShouldQueue
 
             // Dispatch characters sync (will start after planets are done)
             // In production, you might want to use job chaining or events
-            FetchSwapiResourceJob::dispatch('people', 1)->delay(now()->addMinutes(2));
+            FetchSwapiResourceJob::dispatch(\App\Enums\ResourceType::PEOPLE->value, 1)->delay(now()->addMinutes(2));
 
             Log::info('Full SWAPI data synchronization jobs dispatched', [
-                'resources' => ['planets', 'people'],
+                'resources' => [\App\Enums\ResourceType::PLANETS->value, \App\Enums\ResourceType::PEOPLE->value],
                 'note' => 'Planets will sync first, characters after 2 minutes',
             ]);
         } catch (\Exception $e) {

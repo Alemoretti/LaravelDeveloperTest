@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Services;
 
+use App\DataTransferObjects\CharacterDto;
 use App\Models\Character;
 use App\Models\Planet;
 use App\Services\RelationshipMapper;
@@ -63,11 +64,20 @@ class RelationshipMapperTest extends TestCase
         $planet = Planet::factory()->create(['swapi_id' => '1']);
         $character = Character::factory()->withoutHomeworld()->create();
 
-        $swapiData = [
-            'homeworld' => 'https://swapi.dev/api/planets/1/',
-        ];
+        $dto = new CharacterDto(
+            swapiId: '1',
+            name: 'Test Character',
+            height: null,
+            mass: null,
+            hairColor: null,
+            skinColor: null,
+            eyeColor: null,
+            birthYear: null,
+            gender: null,
+            homeworldUrl: 'https://swapi.dev/api/planets/1/'
+        );
 
-        $this->mapper->mapCharacterHomeworld($character, $swapiData);
+        $this->mapper->mapCharacterHomeworld($character, $dto);
         $character->refresh();
 
         $this->assertEquals($planet->id, $character->homeworld_id);
@@ -78,11 +88,20 @@ class RelationshipMapperTest extends TestCase
         $planet = Planet::factory()->create();
         $character = Character::factory()->create(['homeworld_id' => $planet->id]);
 
-        $swapiData = [
-            'homeworld' => 'https://swapi.dev/api/planets/999/',
-        ];
+        $dto = new CharacterDto(
+            swapiId: '1',
+            name: 'Test Character',
+            height: null,
+            mass: null,
+            hairColor: null,
+            skinColor: null,
+            eyeColor: null,
+            birthYear: null,
+            gender: null,
+            homeworldUrl: 'https://swapi.dev/api/planets/999/'
+        );
 
-        $this->mapper->mapCharacterHomeworld($character, $swapiData);
+        $this->mapper->mapCharacterHomeworld($character, $dto);
         $character->refresh();
 
         $this->assertNull($character->homeworld_id);

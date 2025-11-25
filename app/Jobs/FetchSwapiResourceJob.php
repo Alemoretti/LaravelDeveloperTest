@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Services\SwapiService;
+use App\Contracts\SwapiServiceInterface;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -64,7 +64,7 @@ class FetchSwapiResourceJob implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(SwapiService $swapiService): void
+    public function handle(SwapiServiceInterface $swapiService): void
     {
         Log::info('Fetching SWAPI resource page', [
             'resource_type' => $this->resourceType,

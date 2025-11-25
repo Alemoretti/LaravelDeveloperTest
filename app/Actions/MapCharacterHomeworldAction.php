@@ -1,22 +1,23 @@
 <?php
 
-namespace App\Services;
+namespace App\Actions;
 
-use App\Contracts\RelationshipMapperInterface;
+use App\Contracts\PlanetRepositoryInterface;
 use App\DataTransferObjects\CharacterDto;
 use App\Models\Character;
-use App\Models\Planet;
+use App\ValueObjects\SwapiId;
 use Illuminate\Support\Facades\Log;
 
-class RelationshipMapper implements RelationshipMapperInterface
+class MapCharacterHomeworldAction
 {
+    public function __construct(
+        protected PlanetRepositoryInterface $planetRepository
+    ) {}
+
     /**
-     * Map a character's homeworld relationship.
-     *
-     * @param  Character  $character  The character model
-     * @param  CharacterDto  $dto  The character DTO
+     * Execute the action to map a character's homeworld.
      */
-    public function mapCharacterHomeworld(Character $character, CharacterDto $dto): void
+    public function execute(Character $character, CharacterDto $dto): void
     {
         if (empty($dto->homeworldUrl)) {
             Log::warning('Character has no homeworld URL', [
@@ -27,7 +28,7 @@ class RelationshipMapper implements RelationshipMapperInterface
             return;
         }
 
-        $homeworldSwapiId = $this->extractSwapiId($dto->homeworldUrl);
+        $homeworldSwapiId = SwapiId::fromUrlOrNull($dto->homeworldUrl);
 
         if (! $homeworldSwapiId) {
             Log::warning('Could not extract homeworld SWAPI ID', [
@@ -39,13 +40,13 @@ class RelationshipMapper implements RelationshipMapperInterface
         }
 
         // Find the planet by swapi_id
-        $planet = Planet::where('swapi_id', $homeworldSwapiId)->first();
+        $planet = $this->planetRepository->findBySwapiId($homeworldSwapiId->value);
 
         if (! $planet) {
             Log::warning('Homeworld planet not found in database', [
                 'character_id' => $character->id,
                 'character_name' => $character->name,
-                'homeworld_swapi_id' => $homeworldSwapiId,
+                'homeworld_swapi_id' => $homeworldSwapiId->value,
             ]);
 
             // Set homeworld_id to null if planet doesn't exist yet
@@ -65,24 +66,5 @@ class RelationshipMapper implements RelationshipMapperInterface
             'planet_id' => $planet->id,
             'planet_name' => $planet->name,
         ]);
-    }
-
-    /**
-     * Extract SWAPI ID from a URL.
-     *
-     * @param  string|null  $url  The SWAPI URL
-     * @return string|null The extracted ID or null if extraction fails
-     */
-    public function extractSwapiId(?string $url): ?string
-    {
-        if (empty($url)) {
-            return null;
-        }
-
-        // Extract ID from URL like "https://swapi.dev/api/planets/1/"
-        $parts = explode('/', rtrim($url, '/'));
-        $id = end($parts);
-
-        return is_numeric($id) ? $id : null;
     }
 }

@@ -2,17 +2,27 @@
 
 namespace App\Services;
 
+use App\Actions\MapCharacterHomeworldAction;
+use App\Actions\SyncCharacterAction;
+use App\Actions\SyncPlanetAction;
+use App\Contracts\DataSyncServiceInterface;
+use App\Contracts\SwapiServiceInterface;
+use App\DataTransferObjects\CharacterDto;
+use App\DataTransferObjects\PlanetDto;
+use App\Enums\ResourceType;
+use App\Events\ResourceSynced;
+use App\Events\ResourceSyncFailed;
 use App\Models\Character;
 use App\Models\Planet;
-use App\Models\SyncLog;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class DataSyncService
+class DataSyncService implements DataSyncServiceInterface
 {
     public function __construct(
-        protected SwapiService $swapiService,
-        protected RelationshipMapper $relationshipMapper
+        protected SwapiServiceInterface $swapiService,
+        protected SyncCharacterAction $syncCharacterAction,
+        protected SyncPlanetAction $syncPlanetAction,
+        protected MapCharacterHomeworldAction $mapHomeworldAction
     ) {}
 
     /**
@@ -24,39 +34,39 @@ class DataSyncService
     public function syncResource(string $resourceType): int
     {
         $count = 0;
+        $startTime = microtime(true);
+        $resourceTypeEnum = ResourceType::from($resourceType);
 
         Log::info('Starting resource sync', ['resource_type' => $resourceType]);
 
         try {
-            foreach ($this->swapiService->getAllResources($resourceType) as $item) {
+            foreach ($this->swapiService->getAllResources($resourceType) as $dto) {
                 try {
-                    if ($resourceType === 'people') {
-                        $character = $this->syncCharacter($item);
+                    if ($resourceType === ResourceType::PEOPLE->value && $dto instanceof CharacterDto) {
+                        $character = $this->syncCharacter($dto);
                         // Map homeworld relationship
-                        $this->relationshipMapper->mapCharacterHomeworld($character, $item);
-                    } elseif ($resourceType === 'planets') {
-                        $this->syncPlanet($item);
+                        $this->mapHomeworldAction->execute($character, $dto);
+                    } elseif ($resourceType === ResourceType::PLANETS->value && $dto instanceof PlanetDto) {
+                        $this->syncPlanet($dto);
                     }
 
                     $count++;
                 } catch (\Exception $e) {
                     Log::error('Failed to sync item', [
                         'resource_type' => $resourceType,
-                        'item' => $item,
+                        'dto' => $dto,
                         'exception' => $e->getMessage(),
                     ]);
                 }
             }
 
-            Log::info('Resource sync completed', [
-                'resource_type' => $resourceType,
-                'count' => $count,
-            ]);
+            $duration = microtime(true) - $startTime;
+
+            // Dispatch success event
+            event(new ResourceSynced($resourceTypeEnum, $count, $duration));
         } catch (\Exception $e) {
-            Log::error('Resource sync failed', [
-                'resource_type' => $resourceType,
-                'exception' => $e->getMessage(),
-            ]);
+            // Dispatch failure event
+            event(new ResourceSyncFailed($resourceTypeEnum, $e));
 
             throw $e;
         }
@@ -65,102 +75,24 @@ class DataSyncService
     }
 
     /**
-     * Sync a character from SWAPI data.
+     * Sync a character from SWAPI DTO.
      *
-     * @param  array  $data  The character data from SWAPI
+     * @param  CharacterDto  $dto  The character DTO
      * @return Character The synced character model
      */
-    public function syncCharacter(array $data): Character
+    public function syncCharacter(CharacterDto $dto): Character
     {
-        $swapiId = $this->extractSwapiId($data['url']);
-
-        return DB::transaction(function () use ($data, $swapiId) {
-            $character = Character::updateOrCreate(
-                ['swapi_id' => $swapiId],
-                [
-                    'name' => $data['name'] ?? null,
-                    'height' => $data['height'] ?? null,
-                    'mass' => $data['mass'] ?? null,
-                    'hair_color' => $data['hair_color'] ?? null,
-                    'skin_color' => $data['skin_color'] ?? null,
-                    'eye_color' => $data['eye_color'] ?? null,
-                    'birth_year' => $data['birth_year'] ?? null,
-                    'gender' => $data['gender'] ?? null,
-                    // Note: homeworld_id will be set later by RelationshipMapper
-                ]
-            );
-
-            // Log sync operation
-            SyncLog::create([
-                'resource_type' => 'people',
-                'resource_id' => $swapiId,
-                'status' => 'success',
-                'synced_at' => now(),
-            ]);
-
-            Log::info('Character synced', [
-                'swapi_id' => $swapiId,
-                'name' => $character->name,
-            ]);
-
-            return $character;
-        });
+        return $this->syncCharacterAction->execute($dto);
     }
 
     /**
-     * Sync a planet from SWAPI data.
+     * Sync a planet from SWAPI DTO.
      *
-     * @param  array  $data  The planet data from SWAPI
+     * @param  PlanetDto  $dto  The planet DTO
      * @return Planet The synced planet model
      */
-    public function syncPlanet(array $data): Planet
+    public function syncPlanet(PlanetDto $dto): Planet
     {
-        $swapiId = $this->extractSwapiId($data['url']);
-
-        return DB::transaction(function () use ($data, $swapiId) {
-            $planet = Planet::updateOrCreate(
-                ['swapi_id' => $swapiId],
-                [
-                    'name' => $data['name'] ?? null,
-                    'rotation_period' => $data['rotation_period'] ?? null,
-                    'orbital_period' => $data['orbital_period'] ?? null,
-                    'diameter' => $data['diameter'] ?? null,
-                    'climate' => $data['climate'] ?? null,
-                    'gravity' => $data['gravity'] ?? null,
-                    'terrain' => $data['terrain'] ?? null,
-                    'surface_water' => $data['surface_water'] ?? null,
-                    'population' => $data['population'] ?? null,
-                ]
-            );
-
-            // Log sync operation
-            SyncLog::create([
-                'resource_type' => 'planets',
-                'resource_id' => $swapiId,
-                'status' => 'success',
-                'synced_at' => now(),
-            ]);
-
-            Log::info('Planet synced', [
-                'swapi_id' => $swapiId,
-                'name' => $planet->name,
-            ]);
-
-            return $planet;
-        });
-    }
-
-    /**
-     * Extract SWAPI ID from a URL.
-     *
-     * @param  string  $url  The SWAPI URL
-     * @return string The extracted ID
-     */
-    private function extractSwapiId(string $url): string
-    {
-        // Extract ID from URL like "https://swapi.dev/api/people/1/"
-        $parts = explode('/', rtrim($url, '/'));
-
-        return end($parts);
+        return $this->syncPlanetAction->execute($dto);
     }
 }
